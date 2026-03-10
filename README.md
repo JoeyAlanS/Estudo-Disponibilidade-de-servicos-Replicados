@@ -1,4 +1,4 @@
-# Disponibilidade de Serviços Replicados
+# Análise de Disponibilidade em Serviços Replicados
 
 ## GRUPO G
 
@@ -8,27 +8,34 @@
 ---
 ## Introdução
 
-Em sistemas distribuídos, a replicação de servidores é utilizada para aumentar a disponibilidade de um serviço. Quando um serviço é replicado em múltiplos servidores, ele pode continuar funcionando mesmo que alguns servidores falhem.
+Em sistemas distribuídos, a replicação de servidores é uma técnica amplamente utilizada para aumentar a disponibilidade de um serviço.
 
-Neste trabalho analisamos matematicamente e experimentalmente a disponibilidade de um serviço replicado.
+Quando um serviço é replicado em vários servidores, ele pode continuar operando mesmo que alguns servidores falhem.
 
-Os parâmetros considerados são:
+Neste trabalho analisamos a disponibilidade de um serviço replicado utilizando três abordagens:
+
+1. Análise matemática da disponibilidade
+2. Simulação estocástica do sistema
+3. Cálculo do número mínimo de réplicas necessárias para atingir diferentes níveis de disponibilidade ("noves")
+
+Os parâmetros utilizados são:
 
 * **n** → número total de servidores
-* **k** → número mínimo de servidores disponíveis para que o serviço funcione
-* **p** → probabilidade de um servidor estar disponível em um determinado instante
-
-Com esses parâmetros é possível calcular a disponibilidade do serviço.
+* **k** → número mínimo de servidores disponíveis para o serviço funcionar
+* **p** → probabilidade de um servidor estar disponível
 
 ---
 
-# Exercício 1.1 — Dedução da Fórmula
+# Exercício 1.1 — Dedução da Fórmula de Disponibilidade
 
-Cada servidor possui probabilidade **p** de estar disponível e probabilidade **(1 − p)** de falhar.
+Cada servidor possui:
 
-Como cada servidor opera de forma independente, o número de servidores disponíveis segue uma distribuição binomial.
+* probabilidade **p** de estar disponível
+* probabilidade **(1 − p)** de falhar
 
-A probabilidade de **exatamente i servidores estarem disponíveis** é dada por:
+Assumindo independência entre os servidores, o número de servidores disponíveis segue uma distribuição binomial.
+
+A probabilidade de **exatamente i servidores estarem disponíveis** é:
 
 P(i) = C(n,i) * p^i * (1-p)^(n-i)
 
@@ -36,11 +43,9 @@ onde:
 
 C(n,i) = n! / (i!(n-i)!)
 
-é o coeficiente binomial.
-
 O serviço permanece disponível quando **pelo menos k servidores estão ativos**.
 
-Assim, a disponibilidade do sistema é:
+Portanto, a disponibilidade do sistema é:
 
 A(n,k,p) = Σ(i=k até n) C(n,i) p^i (1-p)^(n-i)
 
@@ -48,17 +53,17 @@ A(n,k,p) = Σ(i=k até n) C(n,i) p^i (1-p)^(n-i)
 
 ## Casos extremos
 
-### k = 1 (operações de consulta)
+### Caso 1 — k = 1 (operações de leitura)
 
-O sistema funciona se **ao menos um servidor estiver ativo**.
+O serviço funciona se **pelo menos um servidor estiver ativo**.
 
-É mais fácil calcular a probabilidade de todos falharem.
+A disponibilidade pode ser calculada como:
 
-A = 1 - (1 - p)^n
+A = 1 − (1 − p)^n
 
 ---
 
-### k = n (operações de atualização)
+### Caso 2 — k = n (operações de escrita)
 
 Todos os servidores precisam estar disponíveis.
 
@@ -68,9 +73,13 @@ A = p^n
 
 ---
 
-# Exercício 1.2 — Análise Analítica
+# Exercício 1.2 — Cálculo Analítico
 
-Utilizando a fórmula derivada anteriormente, implementamos um programa que calcula a disponibilidade para diferentes valores de **n**, **k** e **p**.
+A fórmula derivada foi implementada em Python para calcular a disponibilidade do sistema para diferentes valores de:
+
+* n (número de servidores)
+* k (quórum mínimo)
+* p (probabilidade de disponibilidade)
 
 Foram analisados três cenários principais:
 
@@ -78,41 +87,152 @@ Foram analisados três cenários principais:
 * k = n/2
 * k = n
 
-Os resultados foram organizados em tabelas e visualizados em gráficos 2D para facilitar a análise.
+Os resultados foram organizados em tabelas e gráficos.
 
-Observa-se que quanto maior o valor de **k**, menor tende a ser a disponibilidade do sistema, pois mais servidores precisam estar disponíveis simultaneamente.
+Na implementação atual (`comparacao_teoria_simulacao.py`), foi utilizada a faixa:
+
+* n = 1, 2, ..., 20
+* p em {0.5, 0.8, 0.9}
+* casos de k: 1, ceil(n/2), n
+
+Observa-se que quanto maior o valor de **k**, menor a disponibilidade do sistema, pois mais servidores precisam estar simultaneamente ativos.
 
 ---
 
 # Exercício 1.2 — Simulação Estocástica
 
-Além do cálculo analítico, foi implementado um simulador estocástico para validar os resultados teóricos.
+Além do cálculo analítico, foi implementado um simulador estocástico.
 
-O simulador funciona da seguinte forma:
+O simulador realiza várias rodadas onde:
 
-1. Define-se os valores de **n**, **k** e **p**
-2. Para cada rodada:
+1. Para cada servidor é gerado um número aleatório entre 0 e 1
+2. Se o valor gerado for menor ou igual a **p**, o servidor é considerado disponível
+3. Conta-se o número de servidores disponíveis
+4. Verifica-se se o número de servidores ativos é maior ou igual a **k**
 
-   * gera-se um número aleatório entre 0 e 1 para cada servidor
-   * se o número for menor ou igual a **p**, o servidor é considerado disponível
-3. Conta-se quantos servidores estão ativos
-4. Verifica-se se pelo menos **k servidores estão disponíveis**
-5. Repete-se o processo por um grande número de rodadas
+Na comparação automática, foram usadas **50.000 rodadas** por combinação de parâmetros.
 
 A disponibilidade experimental é então calculada como:
 
 disponibilidade = rodadas bem sucedidas / total de rodadas
 
-Os resultados experimentais são comparados com os valores analíticos.
+Os resultados simulados são comparados com os valores teóricos.
 
-Quando o número de rodadas é grande, os valores simulados se aproximam dos valores teóricos.
+Quando o número de rodadas é grande, os valores experimentais convergem para os valores analíticos.
+
+Ao executar `comparacao_teoria_simulacao.py`, são gerados automaticamente:
+
+* `tabela_teoria_vs_simulacao.csv` (valores analíticos e experimentais lado a lado)
+* `grafico_disponibilidade_analitica.png` (curvas analíticas para os casos base com p = 0.9)
+* `grafico_teoria_vs_simulacao.png` (comparação teoria vs simulação com p = 0.9)
+
+---
+
+# Exercício 1.3 — Número de Réplicas para Atingir "Noves"
+
+Neste exercício analisamos quantas réplicas são necessárias para atingir níveis específicos de disponibilidade.
+
+Os parâmetros fixados foram:
+
+* n variável
+* k = 1
+* p = 0.5
+
+A fórmula utilizada foi:
+
+A = 1 − (1 − p)^n
+
+Substituindo p = 0.5:
+
+A = 1 − (0.5)^n
+
+Para encontrar o número mínimo de servidores necessário para atingir uma disponibilidade desejada **f**, isolamos n:
+
+n ≥ log(1 − f) / log(0.5)
+
+---
+
+## Resultados
+
+| Disponibilidade | Nome comum | n mínimo |
+| --------------- | ---------- | -------- |
+| 0.9             | 1 nove     | 4        |
+| 0.99            | 2 noves    | 7        |
+| 0.999           | 3 noves    | 10       |
+| 0.9999          | 4 noves    | 14       |
+| 0.99999         | 5 noves    | 17       |
+| 0.999999        | 6 noves    | 20       |
+
+---
+
+## Análise
+
+Os resultados mostram que o número de réplicas cresce de forma aproximadamente logarítmica.
+
+Mesmo quando cada servidor possui apenas **50% de chance de estar disponível**, a replicação permite atingir níveis muito altos de disponibilidade.
+
+Para atingir **seis noves (99.9999%)**, são necessários aproximadamente **20 servidores replicados**.
+
+Isso demonstra o poder da replicação para aumentar a confiabilidade de sistemas distribuídos.
 
 ---
 
 # Conclusão
 
-Os resultados mostram que a replicação de servidores aumenta significativamente a disponibilidade do sistema.
+A replicação de servidores é uma técnica fundamental para aumentar a disponibilidade de serviços.
 
-Porém, exigir muitos servidores simultaneamente disponíveis (valores altos de **k**) reduz a disponibilidade geral do serviço.
+Os resultados mostraram que:
 
-A simulação estocástica confirmou os valores obtidos pela fórmula analítica, demonstrando a validade do modelo matemático.
+* sistemas com **k baixo** possuem maior disponibilidade
+* exigir muitos servidores ativos reduz a disponibilidade
+* replicação permite atingir níveis extremamente altos de confiabilidade
+* simulações confirmam os resultados matemáticos
+
+O estudo demonstra como modelos probabilísticos podem ser utilizados para projetar sistemas distribuídos mais confiáveis.
+
+---
+
+# Como Executar 
+
+Use os comandos abaixo no terminal, dentro da pasta do projeto.
+
+1. Exercício 1.2 (parte analítica, tabela de n/k/p):
+
+```bash
+python codigo_analitico.py
+```
+
+2. Exercício 1.2 (simulação simples de um cenário):
+
+```bash
+python simulador_estocastico.py
+```
+
+3. Exercício 1.2 (comparação completa teoria vs simulação e gráficos):
+
+```bash
+python comparacao_teoria_simulacao.py
+```
+
+Esse comando gera:
+
+* `tabela_teoria_vs_simulacao.csv`
+* `grafico_disponibilidade_analitica.png`
+* `grafico_teoria_vs_simulacao.png`
+
+4. Exercício 1.3 (quantas réplicas são necessárias para cada disponibilidade):
+
+```bash
+python replica_para_noves.py
+```
+
+Exemplo com parâmetros personalizados (`p` e alvos):
+
+```bash
+python replica_para_noves.py --p 0.5 --alvos 0.9 0.99 0.999
+```
+
+Saída esperada no Exercício 1.3:
+
+* `Servidores (n)` = total de servidores necessários
+* `Replicas adicionais` = quantas réplicas além do servidor original (`n - 1`)
