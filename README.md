@@ -1,5 +1,11 @@
 # Disponibilidade de Serviços Replicados
 
+## GRUPO G
+
+* NOME: Joey Alan de Freitas Solis - MATRÍCULA:2320416
+* NOME: Hector Zendejas Rebouças  - MATRÍCULA:2315024
+
+---
 ## Introdução
 
 Em sistemas distribuídos, a replicação de servidores é utilizada para aumentar a disponibilidade de um serviço. Quando um serviço é replicado em múltiplos servidores, ele pode continuar funcionando mesmo que alguns servidores falhem.
