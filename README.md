@@ -38,7 +38,7 @@ Assumindo independência entre os servidores, o número de servidores disponíve
 
 A probabilidade de **exatamente i servidores estarem disponíveis** é:
 
-**P(i) = C(n,i) * p^i * (1-p)^(n-i)**
+**P(i) = C(n,i) \* p^i \* (1-p)^(n-i)**
 
 onde:
 
@@ -140,6 +140,21 @@ Percebe-se que as curvas simuladas acompanham muito de perto as curvas teóricas
 <p align="center">
   <img src="grafico_teoria_vs_simulacao.png" alt="Comparação entre teoria e simulação" width="700"/>
 </p>
+
+## Resultados (Teoria vs Simulação)
+
+A tabela completa com os valores analíticos e simulados está disponível no arquivo abaixo:
+
+📄 [tabela_teoria_vs_simulacao.csv](tabela_teoria_vs_simulacao.csv)
+
+Abaixo, uma pequena amostra ilustrativa dos resultados obtidos:
+
+| n | k | p   | Analítico | Simulado |
+|---|---|-----|-----------|----------|
+| 1 | 1 | 0.9 | 0.9000    | 0.8998   |
+| 2 | 1 | 0.9 | 0.9900    | 0.9899   |
+| 3 | 2 | 0.9 | 0.9720    | 0.9715   |
+| 5 | 3 | 0.9 | 0.9914    | 0.9910   |
 
 Ao executar `comparacao_teoria_simulacao.py`, são gerados automaticamente:
 
