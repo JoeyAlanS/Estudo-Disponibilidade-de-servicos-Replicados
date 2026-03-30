@@ -224,11 +224,3 @@ O estudo demonstra como modelos probabilísticos podem ser utilizados para proje
 
 ---
 
-# Como Executar
-
-Use os comandos abaixo no terminal, dentro da pasta do projeto.
-
-## 1. Exercício 1.2 — Parte analítica
-
-```bash
-python codigo_analitico.py
